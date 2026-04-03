@@ -31,16 +31,15 @@ mswep_files = [(mswep_path, f) for f in files]
 with Pool() as pool:
     # [time, avg, max, min, sum]
     stats = np.asarray(pool.starmap(get_precip_stats, mswep_files))
-    print(stats.shape)
     print("Stats done. Saving...")
     df = pd.DataFrame({
-        'time': stats[:,1],
-        'mean': stats[:,2],
-        'median': stats[:,3],
-        '95th': stats[:,4],
-        'max': stats[:,5],
-        'min': stats[:,6],
-        'sum': stats[:,7]
+        'time': stats[:,0],
+        'mean': stats[:,1],
+        'median': stats[:,2],
+        '95th': stats[:,3],
+        'max': stats[:,4],
+        'min': stats[:,5],
+        'sum': stats[:,6]
     })
     # Save to CSV
     df.to_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats.csv", index=False)
