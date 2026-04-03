@@ -28,3 +28,4 @@ mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f))
 with Pool() as pool:
     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
     print("Done.")
+
