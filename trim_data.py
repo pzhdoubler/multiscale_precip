@@ -29,16 +29,30 @@ def slice_mswep_with_xu_wrf(coords_loc, mswep_loc, mswep_save_loc):
     mswep = os.listdir(mswep_loc)
     init = True
 
-    for file in mswep:
-        s = time.time()
-        ds = xr.open_dataset(file)
-        subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
-        subset.to_netcdf(mswep_save_loc + file)
-        if init:
-            init = False
-            e = time.time()
-            print(f"One file took {e - s} seconds")
-            print(f"All files estimated to take {len(mswep) * (e - s)} seconds")
+    ds = xr.open_mfdataset(
+        os.path.join(mswep_loc, "*.nc"),
+        combine="by_coords",
+        parallel=True,
+        chunks={"lat": 200, "lon": 200}
+    )
+
+    subset = ds.sel(
+        lat=slice(pr_lat_max, pr_lat_min),
+        lon=slice(pr_lon_min, pr_lon_max)
+    )
+
+    subset.to_netcdf("combined_subset.nc")
+
+    # for file in mswep:
+    #     s = time.time()
+    #     ds = xr.open_dataset(file)
+    #     subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
+    #     subset.to_netcdf(mswep_save_loc + file)
+    #     if init:
+    #         init = False
+    #         e = time.time()
+    #         print(f"One file took {e - s} seconds")
+    #         print(f"All files estimated to take {len(mswep) * (e - s)} seconds")
 
 
 
