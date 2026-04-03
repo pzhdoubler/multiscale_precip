@@ -25,6 +25,20 @@ plt.xlabel("Value")
 plt.ylabel("Frequency")
 plt.show()
 
+plt.figure(figsize=(8,5))
+plt.hist(means, bins=100, range=(0, np.percentile(means, 50)))  # zoom on lower half
+plt.title("Zoomed-in Histogram of Precipitation (lower end)")
+plt.xlabel("Precipitation value")
+plt.ylabel("Frequency")
+plt.show()
+
+plt.figure(figsize=(8,5))
+plt.hist(means, bins=100, range=(0, np.percentile(means, 90)), log=True)
+plt.title("Histogram of Precipitation (log scale)")
+plt.xlabel("Precipitation value")
+plt.ylabel("Log frequency")
+plt.show()
+
 plt.figure()
 plt.hist(maxs, bins=50)
 plt.title("Max Precipitation")
