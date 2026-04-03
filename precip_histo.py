@@ -3,36 +3,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import glob
 import time
+from dask.diagnostics import ProgressBar
 
-files = sorted(glob.glob("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/*.nc"))
+with ProgressBar():
+    ds = xr.open_mfdataset(
+        "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/*.nc",
+        combine="by_coords",
+        chunks={'time': 1, 'lat': 500, 'lon': 500}
+    )
 
-means = []
-maxs = []
-mins = []
+    var = ds['precip']
 
-init = True
-
-for f in files:
-    s = time.time()
-    ds = xr.open_dataset(f)
-
-    # replace 'precip' with your actual variable name
-    var = ds['precipitation']
-
-    means.append(var.mean().item())
-    maxs.append(var.max().item())
-    mins.append(var.min().item())
-
-    ds.close()
-    if init:
-        e = time.time()
-        print(f"One file: {e-s} s")
-        print(f"All files: {len(files)*(e-s)} s")
-        init = False
-
-means = np.array(means)
-maxs = np.array(maxs)
-mins = np.array(mins)
+    means = var.mean(dim=['lat','lon']).compute()
+    maxs = var.max(dim=['lat','lon']).compute()
+    mins = var.min(dim=['lat','lon']).compute()
 
 plt.figure()
 plt.hist(means, bins=50)
