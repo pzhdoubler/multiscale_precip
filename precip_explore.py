@@ -19,10 +19,12 @@ def get_precip_stats(path, file):
     return [file, t, avg, max, min, sum]
 
 # Path to your NetCDF files
-files = sorted(glob.glob("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/*.nc"))
+mswep_path = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+
+files = sorted(os.listdir(mswep_path))
 files = files[:10]
 
-mswep_files = [("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/", f) for f in files]
+mswep_files = [(mswep_path, f) for f in files]
 
 print(files)
 
