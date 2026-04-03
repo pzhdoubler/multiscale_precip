@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import xarray as xr
+import time
 
 def slice_mswep_with_xu_wrf(coords_loc, mswep_loc, mswep_save_loc):
     ##### GET MSWEP LAT/LON SLICE
@@ -26,13 +27,19 @@ def slice_mswep_with_xu_wrf(coords_loc, mswep_loc, mswep_save_loc):
 
     # list mswep files
     mswep = os.listdir(mswep_loc)
+    init = True
 
-    print(mswep[:5])
+    for file in mswep:
+        s = time.time()
+        ds = xr.open_dataset(file)
+        subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
+        subset.to_netcdf(mswep_save_loc + file)
+        if init:
+            init = False
+            e = time.time()
+            print(f"One file took {e - s} seconds")
+            print(f"All files estimated to take {len(mswep) * (e - s)} seconds")
 
-    # for file in mswep:
-    #     ds = xr.open_dataset(file)
-    #     subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
-    #     subset.to_netcdf(mswep_save_loc + file)
 
 
 coords_loc = "../"
