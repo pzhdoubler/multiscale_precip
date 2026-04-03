@@ -7,12 +7,12 @@ from dask.diagnostics import ProgressBar
 
 with ProgressBar():
     ds = xr.open_mfdataset(
-        "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/*.nc",
+        "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/202100*.nc",
         combine="by_coords",
         chunks={'time': 1, 'lat': 500, 'lon': 500}
     )
 
-    var = ds['precip']
+    var = ds['precipitation']
 
     means = var.mean(dim=['lat','lon']).compute()
     maxs = var.max(dim=['lat','lon']).compute()
@@ -28,9 +28,4 @@ plt.show()
 plt.figure()
 plt.hist(maxs, bins=50)
 plt.title("Max Precipitation")
-plt.show()
-
-plt.figure()
-plt.hist(mins, bins=50)
-plt.title("Min Precipitation")
 plt.show()
