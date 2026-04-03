@@ -24,7 +24,6 @@ def get_precip_stats(path, file):
 mswep_path = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
 files = sorted(os.listdir(mswep_path))
-files = files[:10]
 
 mswep_files = [(mswep_path, f) for f in files]
 
