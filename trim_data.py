@@ -17,14 +17,12 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
     subset.to_netcdf(save)
 
 
+mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
+mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
-coords_loc = "../"
-mswep_loc = "../mswep/hourly/"
-mswep_save = "../mswep/trimmed/"
-
-xu_wrf = xr.open_dataset(coords_loc + "xu_wrf_coordinates.nc")
+xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
 mswep = os.listdir(mswep_loc)
-mswep = mswep[:5]
+
 mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f)) for f in mswep]
 
 with Pool() as pool:
