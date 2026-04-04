@@ -18,12 +18,15 @@ def get_precip_stats(path, file):
     max = var.max().item()
     min = var.min().item()
     sum = var.sum().item()
-    return [t, avg, median, nf_per, max, min, sum]
+    drizzle_threshold = 0.1
+    exceed = (var > drizzle_threshold).sum() / var.size
+    return [t, avg, median, nf_per, max, min, sum, exceed]
 
 # Path to your NetCDF files
 mswep_path = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
 files = sorted(os.listdir(mswep_path))
+files = files[:50]
 
 mswep_files = [(mswep_path, f) for f in files]
 
@@ -38,8 +41,8 @@ with Pool() as pool:
         '95th': stats[:,3],
         'max': stats[:,4],
         'min': stats[:,5],
-        'sum': stats[:,6]
+        'drizzle exceedance': stats[:,6]
     })
     # Save to CSV
-    df.to_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats.csv", index=False)
-    print("Saved statistics to trimmed_precip_stats.csv")
+    df.to_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats2.csv", index=False)
+    print("Saved statistics to trimmed_precip_stats2.csv")
