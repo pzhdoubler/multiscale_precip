@@ -20,7 +20,8 @@ def get_precip_stats(path, file):
     sum = var.sum().item()
     drizzle_threshold = 0.1
     exceed = (var > drizzle_threshold).sum().item() / var.size
-    print("tot:", var > drizzle_threshold).sum().item()
+    print("tot:", (var > drizzle_threshold).sum().item())
+    print("size:", var.size)
     print("val:", exceed)
     return [t, avg, median, nf_per, max, min, sum, exceed]
 
