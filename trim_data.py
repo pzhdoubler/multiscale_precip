@@ -16,16 +16,50 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
     subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
     subset.to_netcdf(save)
 
+##########################
+######## MSWEP #############
+##########################
 
-mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
-mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+# mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
+# mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
-xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
-mswep = os.listdir(mswep_loc)
+# xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
+# mswep = os.listdir(mswep_loc)
 
-mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f)) for f in mswep]
+# mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f)) for f in mswep]
 
-with Pool() as pool:
-    done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
-    print("Done.")
+# with Pool() as pool:
+#     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
+#     print("Done.")
 
+##########################
+######## ERA5 #############
+##########################
+
+era5_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/"
+era5_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
+files = ["gp-500mb_2019-2021.grib", "gp-500mb_2-2.grib", "gp-500mb_2-3.grib"]
+
+for file in files:
+    print(f"Working on {file} ...")
+
+    # first coarsen the data
+    ds = xr.open_dataset(os.path.join(era5_loc, file), engine="cfgrib")
+
+    ds = ds.sortby('latitude')
+
+    weights = np.cos(np.deg2rad(ds['latitude']))
+
+    weights_2d = weights.broadcast_like(ds)
+
+    num = (ds * weights_2d).coarsen(latitude=4, longitude=4, boundary='trim').sum()
+    den = weights_2d.coarsen(latitude=4, longitude=4, boundary='trim').sum()
+
+    ds_coarse = num / den
+
+    # Group by year
+    for year, ds_year in ds_coarse.groupby('time.year'):
+        outfile = os.path.join(era5_save, f"gp_500mb_{year}.nc")
+        
+        print(f"Writing {outfile}")
+        ds_year.to_netcdf(outfile)
