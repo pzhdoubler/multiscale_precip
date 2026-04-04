@@ -19,14 +19,15 @@ def get_precip_stats(path, file):
     min = var.min().item()
     sum = var.sum().item()
     drizzle_threshold = 0.1
-    exceed = (var > drizzle_threshold).sum() / var.size
+    exceed = ((var > drizzle_threshold).sum() / var.size).item()
+    print(exceed)
     return [t, avg, median, nf_per, max, min, sum, exceed]
 
 # Path to your NetCDF files
 mswep_path = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
 files = sorted(os.listdir(mswep_path))
-files = files[:50]
+files = files[:2]
 
 mswep_files = [(mswep_path, f) for f in files]
 
