@@ -42,5 +42,5 @@ pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 pr_files = [t.to_pydatetime().strftime("%Y%j.%H.nc") for t in times]
 
 print("Opening pr data ...")
-pr_subset = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files])
+pr_subset = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files], parallel=True)
 print(pr_subset)
