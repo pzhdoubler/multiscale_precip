@@ -53,6 +53,9 @@ dt_list = [datetime.strptime(f, "%Y%j.%H.nc") for f in file_list]
 years = [2020,2021,2022,2023]
 months = [m for m in range(1,13)]
 
+years = [2020]
+months = [1,2]
+
 year_grp = {}
 month_grp = {}
 
@@ -70,9 +73,14 @@ for y in years:
             grp.append(k)
     year_grp[f"pr_{y}.nc"] = grp
 
-print(year_grp)
-print(month_grp)
+month_tasks = [([os.path.join(mswep_loc, f) for f in month_grp[k]], k) for k in month_grp.keys()]
+year_tasks = [([os.path.join(mswep_save, f) for f in year_grp[k]], k) for k in year_grp.keys()]
 
+with Pool() as pool:
+    mnths = pool.starmap(merge_ncs, month_tasks)
+    print("Months done")
+    yrs = pool.starmap(merge_ncs, year_tasks)
+    print("Years done")
 
 ###################################
 ######## ERA5 coarsen #############
