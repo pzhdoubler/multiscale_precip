@@ -2,6 +2,7 @@ import os
 import numpy as np
 import xarray as xr
 from multiprocessing import Pool
+from collections import defaultdict
 
 def slice_mswep_with_xu_wrf(ds_coords, file, save):
     ##### GET MSWEP LAT/LON SLICE
@@ -33,20 +34,54 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
 #     print("Done.")
 
 pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+out_dir = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_yearly/"
 
-files = sorted([os.path.join(pr_loc, f) for f in os.listdir(pr_loc)])
+os.makedirs(out_dir, exist_ok=True)
 
-ds_all = xr.open_mfdataset(
-    files,
-    combine="nested",
-    concat_dim="time",
-    parallel=True,
-    coords="minimal",
-    compat="override",
-    chunks={"time": 100}
-)
+# -------------------------
+# 1. Group files by year
+# -------------------------
+files_by_year = defaultdict(list)
 
-ds_all.to_zarr("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed.zarr", mode="w")
+for fname in os.listdir(pr_loc):
+    if not fname.endswith(".nc"):
+        continue
+
+    year = int(fname[:4])  # YYYY from YYYYJJJ.HH.nc
+    files_by_year[year].append(os.path.join(pr_loc, fname))
+
+# -------------------------
+# 2. Process each year
+# -------------------------
+for year, files in sorted(files_by_year.items()):
+    print(f"\nProcessing year {year} ({len(files)} files)")
+
+    files = sorted(files)  # ensure chronological order
+
+    ds = xr.open_mfdataset(
+        files,
+        combine="nested",
+        concat_dim="time",
+        coords="minimal",
+        compat="override",
+        parallel=True,
+        chunks={"time": 24}  # ~1 day chunks
+    )
+
+    # -------------------------
+    # 3. Write to NetCDF
+    # -------------------------
+    outfile = os.path.join(out_dir, f"pr_{year}.nc")
+
+    encoding = {
+        var: {"zlib": True, "complevel": 4}
+        for var in ds.data_vars
+    }
+
+    print(f"Writing {outfile}")
+    ds.to_netcdf(outfile, encoding=encoding)
+
+    ds.close()
 
 ##########################
 ######## ERA5 #############
