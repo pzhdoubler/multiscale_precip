@@ -24,10 +24,10 @@ def make_gp_anomalies(ds, method="monthly"):
 
 # gp open and anom calc
 gp_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
-files = ["gp_500mb_2020.nc", "gp_500mb_2021.nc", "gp_500mb_2022.nc", "gp_500mb_2023.nc"]
+gp_files = ["gp_500mb_2020.nc", "gp_500mb_2021.nc", "gp_500mb_2022.nc", "gp_500mb_2023.nc"]
 
 print("Opening gp data ...")
-ds = xr.open_mfdataset([os.path.join(gp_loc, f) for f in files])
+ds = xr.open_mfdataset([os.path.join(gp_loc, f) for f in gp_files])
 
 print("Calculating gp anoms ...")
 gp_anoms = make_gp_anomalies(ds, method="monthly")
@@ -36,6 +36,15 @@ gp_anoms = make_gp_anomalies(ds, method="monthly")
 df = pd.read_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats2.csv", parse_dates=["time"]).set_index("time")
 filtered_df = df[(df["drizzle exceedance"] > 0.05)]
 
+# select gp_subset
 times = filtered_df.index
 gp_subset = gp_anoms.sel(time=times)
 print(gp_subset)
+
+# open pr_subset
+pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+pr_files = [t.to_pydatetime().strftime("%Y%j.%H.nc") for t in times]
+
+print("Opening pr data ...")
+pr_subset = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files])
+print(pr_subset)
