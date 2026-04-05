@@ -32,34 +32,50 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
 #     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
 #     print("Done.")
 
+pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+
+files = sorted([os.path.join(pr_loc, f) for f in os.listdir(pr_loc)])
+
+ds_all = xr.open_mfdataset(
+    files,
+    combine="nested",
+    concat_dim="time",
+    parallel=True,
+    coords="minimal",
+    compat="override",
+    chunks={"time": 100}
+)
+
+ds_all.to_zarr("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed.zarr", mode="w")
+
 ##########################
 ######## ERA5 #############
 ##########################
 
-era5_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/"
-era5_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
-files = ["gp-500mb_2019-2021.grib", "gp-500mb_2-2.grib", "gp-500mb_2-3.grib"]
+# era5_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/"
+# era5_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
+# files = ["gp-500mb_2019-2021.grib", "gp-500mb_2-2.grib", "gp-500mb_2-3.grib"]
 
-for file in files:
-    print(f"Working on {file} ...")
+# for file in files:
+#     print(f"Working on {file} ...")
 
-    # first coarsen the data
-    ds = xr.open_dataset(os.path.join(era5_loc, file), engine="cfgrib")
+#     # first coarsen the data
+#     ds = xr.open_dataset(os.path.join(era5_loc, file), engine="cfgrib")
 
-    ds = ds.sortby('latitude')
+#     ds = ds.sortby('latitude')
 
-    weights = np.cos(np.deg2rad(ds['latitude']))
+#     weights = np.cos(np.deg2rad(ds['latitude']))
 
-    weights_2d = weights.broadcast_like(ds)
+#     weights_2d = weights.broadcast_like(ds)
 
-    num = (ds * weights_2d).coarsen(latitude=4, longitude=4, boundary='trim').sum()
-    den = weights_2d.coarsen(latitude=4, longitude=4, boundary='trim').sum()
+#     num = (ds * weights_2d).coarsen(latitude=4, longitude=4, boundary='trim').sum()
+#     den = weights_2d.coarsen(latitude=4, longitude=4, boundary='trim').sum()
 
-    ds_coarse = num / den
+#     ds_coarse = num / den
 
-    # Group by year
-    for year, ds_year in ds_coarse.groupby('time.year'):
-        outfile = os.path.join(era5_save, f"gp_500mb_{year}.nc")
+#     # Group by year
+#     for year, ds_year in ds_coarse.groupby('time.year'):
+#         outfile = os.path.join(era5_save, f"gp_500mb_{year}.nc")
         
-        print(f"Writing {outfile}")
-        ds_year.to_netcdf(outfile)
+#         print(f"Writing {outfile}")
+#         ds_year.to_netcdf(outfile)
