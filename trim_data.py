@@ -1,8 +1,10 @@
 import os
 import numpy as np
 import xarray as xr
+import pandas as pd
 from multiprocessing import Pool
 from collections import defaultdict
+from datetime import datetime
 
 def slice_mswep_with_xu_wrf(ds_coords, file, save):
     ##### GET MSWEP LAT/LON SLICE
@@ -17,9 +19,13 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
     subset = ds.sel(lat=slice(pr_lat_max, pr_lat_min), lon=slice(pr_lon_min, pr_lon_max))
     subset.to_netcdf(save)
 
-##########################
-######## MSWEP #############
-##########################
+def merge_ncs(files, out):
+    ds = xr.open_mfdataset(files)
+    ds.to_netcdf(out)
+
+#################################
+######## MSWEP Trim #############
+#################################
 
 # mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
 # mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
@@ -33,67 +39,44 @@ def slice_mswep_with_xu_wrf(ds_coords, file, save):
 #     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
 #     print("Done.")
 
-pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
-out_dir = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_yearly/"
+#################################
+######## MSWEP Year Sort #############
+#################################
 
-os.makedirs(out_dir, exist_ok=True)
+mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/annual_trimmed/"
 
-# -------------------------
-# 1. Group files by year
-# -------------------------
-files_by_year = defaultdict(list)
+file_list = sorted(os.listdir(mswep_loc))
 
-for fname in os.listdir(pr_loc):
-    if not fname.endswith(".nc"):
-        continue
+dt_list = [datetime.strptime(f, "%Y%j.%H.nc") for f in file_list]
 
-    year = int(fname[:4])  # YYYY from YYYYJJJ.HH.nc
-    files_by_year[year].append(os.path.join(pr_loc, fname))
+years = [2020,2021,2022,2023]
+months = [m for m in range(1,13)]
 
-# -------------------------
-# 2. Process each year
-# -------------------------
-for year, files in sorted(files_by_year.items()):
-    print(f"\nProcessing year {year} ({len(files)} files)")
+year_grp = {}
+month_grp = {}
 
-    files = sorted(files)  # ensure chronological order
+for y in years:
+    for m in months:
+        grp = []
+        for i in range(len(dt_list)):
+            if dt_list[i].year == y and dt_list[i].month == m:
+                grp.append(file_list[i])
+        month_grp[f"{y}{m:02d}.nc"] = grp
+    grp = []
+    keys = month_grp.keys()
+    for k in keys:
+        if k.startswith(str(y)):
+            grp.append(k)
+    year_grp[f"pr_{y}.nc"] = grp
 
-    batch_size = 549
+print(year_grp)
+print(month_grp)
 
-    datasets = []
-    for i in range(0, len(files), batch_size):
-        batch = files[i:i+batch_size]
-        ds_batch = xr.open_mfdataset(
-            batch,
-            combine="nested",
-            concat_dim="time",
-            coords="minimal",
-            compat="override",
-            parallel=True,
-            chunks={"time": 24}
-        )
-        datasets.append(ds_batch)
 
-    ds = xr.concat(datasets, dim="time")
-
-    # -------------------------
-    # 3. Write to NetCDF
-    # -------------------------
-    outfile = os.path.join(out_dir, f"pr_{year}.nc")
-
-    encoding = {
-        var: {"zlib": True, "complevel": 4}
-        for var in ds.data_vars
-    }
-
-    print(f"Writing {outfile}")
-    ds.to_netcdf(outfile, encoding=encoding)
-
-    ds.close()
-
-##########################
-######## ERA5 #############
-##########################
+###################################
+######## ERA5 coarsen #############
+###################################
 
 # era5_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/"
 # era5_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
