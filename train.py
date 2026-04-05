@@ -47,5 +47,7 @@ ds = xr.open_mfdataset(
     [os.path.join(pr_loc, f) for f in pr_files]
 )
 
-pr_subset = ds.sel(time=times)
-print(pr_subset)
+print(ds)
+
+# pr_subset = ds.sel(time=times)
+# print(pr_subset)
