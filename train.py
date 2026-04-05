@@ -40,12 +40,13 @@ print(gp_subset)
 # open pr_subset
 pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 pr_files = sorted(os.listdir(pr_loc))
+pr_files = pr_files[:720]
 
 print("Opening pr data ...")
 ds = xr.open_mfdataset(
     [os.path.join(pr_loc, f) for f in pr_files],
     combine="by_coords",
-    chunks={"time": 100}
+    chunks={"time": 60}
 )
 
 pr_subset = ds.sel(time=times)
