@@ -44,9 +44,7 @@ pr_files = pr_files[:720]
 
 print("Opening pr data ...")
 ds = xr.open_mfdataset(
-    [os.path.join(pr_loc, f) for f in pr_files],
-    combine="by_coords",
-    chunks={"time": 60}
+    [os.path.join(pr_loc, f) for f in pr_files]
 )
 
 pr_subset = ds.sel(time=times)
