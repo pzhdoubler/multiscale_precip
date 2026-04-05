@@ -58,15 +58,23 @@ for year, files in sorted(files_by_year.items()):
 
     files = sorted(files)  # ensure chronological order
 
-    ds = xr.open_mfdataset(
-        files,
-        combine="nested",
-        concat_dim="time",
-        coords="minimal",
-        compat="override",
-        parallel=True,
-        chunks={"time": 24}  # ~1 day chunks
-    )
+    batch_size = 549
+
+    datasets = []
+    for i in range(0, len(files), batch_size):
+        batch = files[i:i+batch_size]
+        ds_batch = xr.open_mfdataset(
+            batch,
+            combine="nested",
+            concat_dim="time",
+            coords="minimal",
+            compat="override",
+            parallel=True,
+            chunks={"time": 24}
+        )
+        datasets.append(ds_batch)
+
+    ds = xr.concat(datasets, dim="time")
 
     # -------------------------
     # 3. Write to NetCDF
