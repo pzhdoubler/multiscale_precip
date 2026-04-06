@@ -40,7 +40,7 @@ for f in files:
 print(f"Years: {files_by_year.keys()}")
 
 # test set
-files_by_year[2020] = files[0:20]
+# files_by_year[2020] = files[0:20]
 
 # see what original xarray looks like
 # test = xr.open_dataset(files_by_year[2020][0])
@@ -86,6 +86,8 @@ for yr, flist in files_by_year.items():
         )
     )
     xr_ds["precipitation"].attrs["units"] = "mm/hr"
+
+    # print(xr_ds)
 
     print(f"Saving pr_{yr}.nc")
     print()
