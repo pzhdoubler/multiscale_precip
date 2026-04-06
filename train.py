@@ -31,19 +31,18 @@ gp_anoms = make_gp_anomalies(ds, method="monthly")
 # determine precip days
 df = pd.read_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats2.csv", parse_dates=["time"]).set_index("time")
 filtered_df = df[(df["drizzle exceedance"] > 0.05)]
+times = filtered_df.index
 
 # select gp_subset
-times = filtered_df.index
 gp_subset = gp_anoms.sel(time=times)
 print(gp_subset)
 
 # open pr_subset
-
 pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/"
+pr_files = os.listdir(pr_loc)
 
-ds = xr.open_dataset(os.path.join(pr_loc, "pr_2020.nc"))
+print("Opening pr data ...")
+ds = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files])
 
-print(ds)
-
-print(ds.time.min())
-print(ds.time.max())
+pr_subset = ds.sel(time=times)
+print(pr_subset)

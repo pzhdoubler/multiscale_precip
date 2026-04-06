@@ -39,49 +39,6 @@ def merge_ncs(files, out):
 #     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
 #     print("Done.")
 
-#################################
-######## MSWEP Year Sort #############
-#################################
-
-mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
-mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/"
-
-file_list = sorted(os.listdir(mswep_loc))
-
-dt_list = [datetime.strptime(f, "%Y%j.%H.nc") for f in file_list]
-
-years = [2020,2021,2022,2023]
-months = [m for m in range(1,13)]
-
-years = [2020]
-months = [1,2]
-
-year_grp = {}
-month_grp = {}
-
-for y in years:
-    for m in months:
-        grp = []
-        for i in range(len(dt_list)):
-            if dt_list[i].year == y and dt_list[i].month == m:
-                grp.append(file_list[i])
-        month_grp[f"{y}{m:02d}.nc"] = grp
-    grp = []
-    keys = month_grp.keys()
-    for k in keys:
-        if k.startswith(str(y)):
-            grp.append(k)
-    year_grp[f"pr_{y}.nc"] = grp
-
-month_tasks = [([os.path.join(mswep_loc, f) for f in month_grp[k]], k) for k in month_grp.keys()]
-year_tasks = [([os.path.join(mswep_save, f) for f in year_grp[k]], k) for k in year_grp.keys()]
-
-with Pool() as pool:
-    mnths = pool.starmap(merge_ncs, month_tasks)
-    print("Months done")
-    yrs = pool.starmap(merge_ncs, year_tasks)
-    print("Years done")
-
 ###################################
 ######## ERA5 coarsen #############
 ###################################
