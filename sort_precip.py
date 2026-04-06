@@ -41,6 +41,9 @@ print(f"Years: {files_by_year.keys()}")
 # test set
 files_by_year[2020] = files[0:20]
 
+# see what original xarray looks like
+test = xr.open_dataset(files_by_year[2020][0])
+print(test)
 
 for yr, flist in files_by_year.items():
     test = netCDF4.Dataset(flist[0], mode="r")
@@ -55,7 +58,6 @@ for yr, flist in files_by_year.items():
     # allocate for times and pr
     times = np.zeros((len(flist)))
     pr = np.zeros((len(flist), lat_var.size, lon_var.size))
-    print(np.sum(pr))
 
     for f, file in enumerate(flist):
         ds = netCDF4.Dataset(file, mode="r")
@@ -64,6 +66,19 @@ for yr, flist in files_by_year.items():
         np.sum(pr[f])
         ds.close()
     
-    print(pr)
-    print(np.sum(pr))
+    xr_ds = xr.Dataset(
+        data_vars=dict(
+            precipitation=(["time", "lat", "lon"], pr)
+        ),
+        coords=dict(
+            lat=("lat", lon_var[:]),
+            lon=("lon", lon_var[:]),
+            time=("time", times)
+        )
+    )
+
+    print(xr_ds)
+
+    xr_ds.to_netcdf(os.path.join(output_dir, f"pr_{yr}.nc"))
+
     break
