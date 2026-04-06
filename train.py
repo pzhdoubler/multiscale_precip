@@ -38,16 +38,12 @@ gp_subset = gp_anoms.sel(time=times)
 print(gp_subset)
 
 # open pr_subset
-pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
-pr_files = sorted(os.listdir(pr_loc))
-pr_files = pr_files[:720]
 
-print("Opening pr data ...")
-ds = xr.open_mfdataset(
-    [os.path.join(pr_loc, f) for f in pr_files]
-)
+pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/"
+
+ds = xr.open_dataset(os.path.join(pr_loc, "pr_2020.nc"))
 
 print(ds)
 
-# pr_subset = ds.sel(time=times)
-# print(pr_subset)
+print(ds.time.min())
+print(ds.time.max())
