@@ -6,6 +6,7 @@ from glob import glob
 from datetime import datetime
 from collections import defaultdict
 import netCDF4
+import cftime
 
 # ======================
 # USER SETTINGS
@@ -56,8 +57,8 @@ for yr, flist in files_by_year.items():
     # pr_attrs = {attr : pr_var.getncattr(attr) for attr in pr_var.ncattrs()}
 
     # allocate for times and pr
-    times = np.zeros((len(flist)), type=)
-    pr = np.zeros((len(flist), lat_var.size, lon_var.size), type=np.float32)
+    times = np.zeros((len(flist)), dtype=cftime.datetime)
+    pr = np.zeros((len(flist), lat_var.size, lon_var.size), dtype=np.float32)
 
     for f, file in enumerate(flist):
         ds = netCDF4.Dataset(file, mode="r")
