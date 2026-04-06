@@ -21,7 +21,7 @@ fig = plt.figure(figsize=(10, 8))
 ax = plt.axes(projection=ccrs.PlateCarree())
 
 mesh = ax.contourf(
-    lon2d, lat2d, ds["precipitation"],
+    lon2d, lat2d, ds["precipitation"].sel(time=time).values[0],
     transform=ccrs.PlateCarree()
 )
 
@@ -37,6 +37,8 @@ plt.close()
 
 ds = xr.open_dataarray("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/pr_2020.nc")
 
+print(ds.sel(time=time).values)
+
 lon = ds["lon"]
 lat = ds["lat"]
 
@@ -46,7 +48,7 @@ fig = plt.figure(figsize=(10, 8))
 ax = plt.axes(projection=ccrs.PlateCarree())
 
 mesh = ax.contourf(
-    lon2d, lat2d, ds["precipitation"].sel(time=time),
+    lon2d, lat2d, ds.sel(time=time).values,
     transform=ccrs.PlateCarree()
 )
 
