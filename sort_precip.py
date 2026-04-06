@@ -39,7 +39,7 @@ for f in files:
 print(f"Years: {files_by_year.keys()}")
 
 # test set
-files_by_year[files_by_year.keys()[0]] = files[0:20]
+files_by_year[2020] = files[0:20]
 
 
 for yr, flist in files_by_year.items():
