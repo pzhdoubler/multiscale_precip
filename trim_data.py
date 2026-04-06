@@ -44,7 +44,7 @@ def merge_ncs(files, out):
 #################################
 
 mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
-mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/annual_trimmed/"
+mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/"
 
 file_list = sorted(os.listdir(mswep_loc))
 
