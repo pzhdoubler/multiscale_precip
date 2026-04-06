@@ -83,7 +83,7 @@ for yr, flist in files_by_year.items():
         coords=dict(
             lon=("lon", lon_var[:]),
             lat=("lat", lat_var[:]),
-            time=("time", times.to_datetimeindex(time_unit="ns"))
+            time=("time", np.array([t.to_datetimeindex(time_unit="ns") for t in times]))
         )
     )
 
