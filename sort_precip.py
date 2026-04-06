@@ -1,6 +1,7 @@
 import os
 import xarray as xr
 import pandas as pd
+import numpy as np
 from glob import glob
 from datetime import datetime
 from collections import defaultdict
@@ -32,12 +33,31 @@ for f in files:
     try:
         y = extract_year(f)
         files_by_year[y].append(f)
+        print(f"Processed year {y} ...")
     except:
         print(f"Skipping bad file: {f}")
 
-test = netCDF4.Dataset(files[0], mode="r")
 
-print(test)
+for yr, flist in files_by_year.items():
+    test = netCDF4.Dataset(flist[0], mode="r")
 
-print(test.variables["precipitation"][:])
-print(test.variables["time"][:])
+    lon_var = test.variables["lon"]
+    lat_var = test.variables["lat"]
+    pr_var = test.variables["precipitation"]
+    time_var = test.variables["time"]
+
+    # pr_attrs = {attr : pr_var.getncattr(attr) for attr in pr_var.ncattrs()}
+
+    # allocate for times and pr
+    times = np.zeros((len(flist)))
+    pr = np.zeros((len(flist), lat_var.size, lon_var.size))
+
+    for f, file in enumerate(flist):
+        ds = netCDF4.Dataset(file, mode="r")
+        times[f] = ds.variables["time"][:][0]
+        pr[f] = ds.variables["precipitation"][:][0]
+        ds.close()
+        break
+    
+    print(pr)
+    break
