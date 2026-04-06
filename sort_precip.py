@@ -50,7 +50,7 @@ test = xr.open_dataset(files_by_year[2020][0])
 print(test)
 
 for yr, flist in files_by_year.items():
-    test = netCDF4.Dataset(flist[0], mode="r")
+    test = netCDF4.Dataset(flist[-1], mode="r")
 
     lon_var = test.variables["lon"]
     lat_var = test.variables["lat"]
@@ -63,41 +63,44 @@ for yr, flist in files_by_year.items():
     times = np.zeros((len(flist)), dtype=cftime.datetime)
     pr = np.zeros((len(flist), lat_var.size, lon_var.size), dtype=np.float32)
 
-    s = time.time()
-    init = True
+    test_t = netCDF4.num2date(test.variables["time"][:], units=time_var.units, calendar=getattr(time_var, 'calendar', 'standard'))[0]
+    print(test_t)
+    print(datetime(test_t.year, test_t.month, test_t.day, test_t.hour, 0, 0))
 
-    for f, file in enumerate(flist):
-        ds = netCDF4.Dataset(file, mode="r")
-        times[f] = netCDF4.num2date(ds.variables["time"][:], units=time_var.units, calendar=getattr(time_var, 'calendar', 'standard'))[0]
-        pr[f] = ds.variables["precipitation"][:][0]
-        np.sum(pr[f])
-        ds.close()
-        if init:
-            e = time.time()
-            init = False
-            print(f"One file took {e-s} seconds")
-            print(f"Year {yr} will take {(e-s)*len(flist)} seconds")
+    # s = time.time()
+    # init = True
+
+    # for f, file in enumerate(flist):
+    #     ds = netCDF4.Dataset(file, mode="r")
+    #     times[f] = netCDF4.num2date(ds.variables["time"][:], units=time_var.units, calendar=getattr(time_var, 'calendar', 'standard'))[0]
+    #     pr[f] = ds.variables["precipitation"][:][0]
+    #     ds.close()
+    #     if init:
+    #         e = time.time()
+    #         init = False
+    #         print(f"One file took {e-s} seconds")
+    #         print(f"Year {yr} will take {(e-s)*len(flist)} seconds")
     
-    xr_ds = xr.Dataset(
-        data_vars=dict(
-            precipitation=(["time", "lat", "lon"], pr)
-        ),
-        coords=dict(
-            lon=("lon", lon_var[:]),
-            lat=("lat", lat_var[:]),
-            time=(
-                "time", 
-                np.array(
-                    [datetime(t.year, t.month, t.day, t.hour, 0, 0) for t in times]
-                )
-            )
-        )
-    )
-    xr_ds["precipitation"].attrs["units"] = "mm/hr"
+    # xr_ds = xr.Dataset(
+    #     data_vars=dict(
+    #         precipitation=(["time", "lat", "lon"], pr)
+    #     ),
+    #     coords=dict(
+    #         lon=("lon", lon_var[:]),
+    #         lat=("lat", lat_var[:]),
+    #         time=(
+    #             "time", 
+    #             np.array(
+    #                 [datetime(t.year, t.month, t.day, t.hour, 0, 0) for t in times]
+    #             )
+    #         )
+    #     )
+    # )
+    # xr_ds["precipitation"].attrs["units"] = "mm/hr"
 
-    print(xr_ds)
+    # print(xr_ds)
 
-    print(f"Saving pr_{yr}.nc")
-    xr_ds.to_netcdf(os.path.join(output_dir, f"pr_{yr}.nc"))
+    # print(f"Saving pr_{yr}.nc")
+    # xr_ds.to_netcdf(os.path.join(output_dir, f"pr_{yr}.nc"))
 
     break
