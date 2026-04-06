@@ -78,7 +78,7 @@ for yr, flist in files_by_year.items():
     
     xr_ds = xr.Dataset(
         data_vars=dict(
-            precipitation=(["time", "lat", "lon"], pr)
+            precipitation=(["time", "lat", "lon"], pr, attrs={"units": "mm/hr"})
         ),
         coords=dict(
             lon=("lon", lon_var[:]),
@@ -86,7 +86,7 @@ for yr, flist in files_by_year.items():
             time=(
                 "time", 
                 np.array(
-                    [datetime(t.year, t.month, t.day, t.hour, t.minute, t.second) for t in times]
+                    [datetime(t.year, t.month, t.day, t.hour, 0, 0) for t in times]
                 )
             )
         )
