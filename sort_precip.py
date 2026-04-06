@@ -38,6 +38,10 @@ for f in files:
         print(f"Skipping bad file: {f}")
 
 
+# test set
+files_by_year[2020] = files[0:20]
+
+
 for yr, flist in files_by_year.items():
     test = netCDF4.Dataset(flist[0], mode="r")
 
@@ -51,13 +55,15 @@ for yr, flist in files_by_year.items():
     # allocate for times and pr
     times = np.zeros((len(flist)))
     pr = np.zeros((len(flist), lat_var.size, lon_var.size))
+    print(np.sum(pr))
 
     for f, file in enumerate(flist):
         ds = netCDF4.Dataset(file, mode="r")
         times[f] = ds.variables["time"][:][0]
         pr[f] = ds.variables["precipitation"][:][0]
+        np.sum(pr[f])
         ds.close()
-        break
     
     print(pr)
+    print(np.sum(pr))
     break
