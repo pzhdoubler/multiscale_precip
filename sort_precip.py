@@ -25,15 +25,14 @@ files = sorted(glob(os.path.join(input_dir, "*.nc")))
 
 print(f"Total files found: {len(files)}")
 
-def extract_year(f):
-    t = datetime.strptime(f.split("/")[-1] ,"%Y%j.%H.nc")
-    return t.year
+def get_datetime(f):
+    return datetime.strptime(f.split("/")[-1] ,"%Y%j.%H.nc")
 
 files_by_year = defaultdict(list)
 
 for f in files:
     try:
-        y = extract_year(f)
+        y = get_datetime(f).year
         files_by_year[y].append(f)
     except:
         print(f"Skipping bad file: {f}")
@@ -41,7 +40,7 @@ for f in files:
 print(f"Years: {files_by_year.keys()}")
 
 # test set
-#files_by_year[2020] = files[0:20]
+files_by_year[2020] = files[0:20]
 
 # see what original xarray looks like
 # test = xr.open_dataset(files_by_year[2020][0])
@@ -54,7 +53,6 @@ for yr, flist in files_by_year.items():
     lat_var = test.variables["lat"]
     pr_var = test.variables["precipitation"]
     time_var = test.variables["time"]
-    base = datetime(1900,1,1)
 
     # allocate for times and pr
     times = np.zeros((len(flist)), dtype=cftime.datetime)
@@ -65,7 +63,7 @@ for yr, flist in files_by_year.items():
 
     for f, file in enumerate(flist):
         ds = netCDF4.Dataset(file, mode="r")
-        times[f] = base + timedelta(days=float(test.variables["time"][:][0]))
+        times[f] = get_datetime(file)
         pr[f] = ds.variables["precipitation"][:][0]
         ds.close()
         if init:
