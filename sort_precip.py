@@ -56,12 +56,13 @@ for yr, flist in files_by_year.items():
     # pr_attrs = {attr : pr_var.getncattr(attr) for attr in pr_var.ncattrs()}
 
     # allocate for times and pr
-    times = np.zeros((len(flist)))
-    pr = np.zeros((len(flist), lat_var.size, lon_var.size))
+    times = np.zeros((len(flist)), type=)
+    pr = np.zeros((len(flist), lat_var.size, lon_var.size), type=np.float32)
 
     for f, file in enumerate(flist):
         ds = netCDF4.Dataset(file, mode="r")
-        times[f] = ds.variables["time"][:][0]
+        print(type(netCDF4.num2date(ds.variables["time"][:], units=time_var.units, calendar=getattr(time_var, 'calendar', 'standard'))[0]))
+        times[f] = netCDF4.num2date(ds.variables["time"][:], units=time_var.units, calendar=getattr(time_var, 'calendar', 'standard'))[0]
         pr[f] = ds.variables["precipitation"][:][0]
         np.sum(pr[f])
         ds.close()
@@ -71,8 +72,8 @@ for yr, flist in files_by_year.items():
             precipitation=(["time", "lat", "lon"], pr)
         ),
         coords=dict(
-            lat=("lat", lon_var[:]),
             lon=("lon", lon_var[:]),
+            lat=("lat", lat_var[:]),
             time=("time", times)
         )
     )
