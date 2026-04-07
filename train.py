@@ -43,7 +43,7 @@ filtered_df = df[(df["drizzle exceedance"] > 0.05)]
 times = filtered_df.index
 
 # select gp_subset
-gp_subset = gp_anoms.sel(time=times)["z"]
+gp_subset = gp_anoms.sel(time=times)["z"].chunk({"time": len(times)})
 gp_subset_avg = np.average(gp_subset)
 
 # open pr_subset
