@@ -39,8 +39,8 @@ times = filtered_df.index
 
 # select gp_subset
 gp_subset = gp_anoms.sel(time=times)["z"]
-gp_subset_avg = np.average(gp_anoms)
 print(gp_subset)
+gp_subset_avg = np.average(gp_anoms)
 
 # open pr_subset
 pr_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_annual/"
