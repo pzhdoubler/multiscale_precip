@@ -31,7 +31,6 @@ ds = xr.open_mfdataset([os.path.join(gp_loc, f) for f in gp_files])
 print("Calculating gp anoms ...")
 gp_anoms = make_gp_anomalies(ds, method="monthly")
 # capture average before min/max transform
-gp_anoms_avg = np.average(gp_anoms)
 
 # determine precip days
 df = pd.read_csv("/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed_precip_stats2.csv", parse_dates=["time"]).set_index("time")
@@ -39,7 +38,8 @@ filtered_df = df[(df["drizzle exceedance"] > 0.05)]
 times = filtered_df.index
 
 # select gp_subset
-gp_subset = gp_anoms.sel(time=times)
+gp_subset = gp_anoms.sel(time=times)["z"]
+gp_subset_avg = np.average(gp_anoms)
 print(gp_subset)
 
 # open pr_subset
@@ -49,15 +49,15 @@ pr_files = os.listdir(pr_loc)
 print("Opening pr data ...")
 ds = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files])
 
-pr_subset = ds.sel(time=times)
+pr_subset = ds.sel(time=times)["precipitation"]
 print(pr_subset)
 
 ########################
 ###### PREPROCESS ######
 ########################
 
-gp_scaled = gp_subset["z"].stack(features=("latitude", "longitude"))
-pr_scaled = pr_subset["precipitation"].stack("lat", "lon")
+gp_scaled = gp_subset.stack(features=("latitude", "longitude"))
+pr_scaled = pr_subset.stack("lat", "lon")
 
 print(gp_scaled)
 print(pr_scaled)
