@@ -15,7 +15,12 @@ def make_gp_anomalies(ds, method="monthly"):
     return anomalies
 
 def min_max_norm(ds):
-    return (ds - np.min(ds)) / (np.max(ds) - np.min(ds))
+    ds_max = np.max(ds)
+    ds_min = np.min(ds)
+    return (ds - ds_min) / (ds_max - ds_min)
+
+def log_transform(ds):
+    return np.log(ds + 1.0)
 
 ########################
 ###### INTAKE ######
@@ -39,7 +44,6 @@ times = filtered_df.index
 
 # select gp_subset
 gp_subset = gp_anoms.sel(time=times)["z"]
-print(gp_subset)
 gp_subset_avg = np.average(gp_subset)
 
 # open pr_subset
@@ -50,7 +54,8 @@ print("Opening pr data ...")
 ds = xr.open_mfdataset([os.path.join(pr_loc, f) for f in pr_files])
 
 pr_subset = ds.sel(time=times)["precipitation"]
-print(pr_subset)
+
+print("Intake Done.")
 
 ########################
 ###### PREPROCESS ######
@@ -62,8 +67,14 @@ pr_scaled = pr_subset.stack(features=("lat", "lon"))
 print(gp_scaled)
 print(pr_scaled)
 
+print("Doing gp Scaling")
 gp_scaled = min_max_norm(gp_scaled).values
+
+print("Doing pr Scaling")
+pr_scaled = log_transform(pr_scaled)
 pr_scaled = min_max_norm(pr_scaled).values
+
+print("Preprocess Done.")
 
 ########################
 ###### TRAIN ######
