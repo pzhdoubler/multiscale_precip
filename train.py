@@ -57,7 +57,7 @@ print(pr_subset)
 ########################
 
 gp_scaled = gp_subset.stack(features=("latitude", "longitude"))
-pr_scaled = pr_subset.stack("lat", "lon")
+pr_scaled = pr_subset.stack(features=("lat", "lon"))
 
 print(gp_scaled)
 print(pr_scaled)
