@@ -27,17 +27,17 @@ def merge_ncs(files, out):
 ######## MSWEP Trim #############
 #################################
 
-# mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
-# mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
+mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
+mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
-# xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
-# mswep = os.listdir(mswep_loc)
+xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
+mswep = os.listdir(mswep_loc)
 
-# mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f)) for f in mswep]
+mswep_tasks = [(xu_wrf, os.path.join(mswep_loc, f), os.path.join(mswep_save, f)) for f in mswep]
 
-# with Pool() as pool:
-#     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
-#     print("Done.")
+with Pool() as pool:
+    done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
+    print("Done.")
 
 ###################################
 ######## ERA5 coarsen #############
