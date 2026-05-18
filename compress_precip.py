@@ -9,6 +9,8 @@ import netCDF4
 import cftime
 import time
 
+# compress precip data to annual files rather than daily
+
 # ======================
 # USER SETTINGS
 # ======================

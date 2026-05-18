@@ -5,6 +5,12 @@ from datetime import datetime
 import os
 from multiprocessing import Pool
 
+###########################################
+######## calculate precip stats #############
+###########################################
+# calculates and saves some stats about precip data
+# most important is drizzle exceedance which will be used to filter out training data
+
 def get_precip_stats(path, file):
     ds = xr.open_dataset(os.path.join(path, file))
     var = ds['precipitation']

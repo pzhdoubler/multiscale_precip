@@ -26,10 +26,12 @@ def merge_ncs(files, out):
 #################################
 ######## MSWEP Trim #############
 #################################
+# select subset of precip data that is focused on the small region of interest
 
 mswep_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/hourly/"
 mswep_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/mswep/trimmed/"
 
+# subset of pr data focused on
 xu_wrf = xr.open_dataset("/ocean/projects/ees210011p/hdoubler/AOSC650/xu_wrf_coordinates.nc")
 mswep = os.listdir(mswep_loc)
 
@@ -39,9 +41,10 @@ with Pool() as pool:
     done = pool.starmap(slice_mswep_with_xu_wrf, mswep_tasks)
     print("Done.")
 
-###################################
-######## ERA5 coarsen #############
-###################################
+#####################################
+######## ERA5 GP coarsen #############
+#####################################
+# coarsening ERA5 gp data from 0.25 to 1 degree to closer match number of cells as precip
 
 # era5_loc = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/"
 # era5_save = "/ocean/projects/ees210011p/hdoubler/AOSC650/era5/coarse/"
